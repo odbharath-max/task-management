@@ -1,47 +1,83 @@
 # Task Management App
 
-A full-stack Task Management application built using React, Node.js, Express.js, and MongoDB.
+A full-stack Task Management application built using React, Node.js, Express.js, and MongoDB Atlas.
 
-## Features
-
-- Create tasks
-- View all tasks
-- Update task status
-- Mark tasks as completed or pending
-- Delete tasks
-- REST API integration
-- MongoDB database
-- Responsive user interface
-
-## Technologies Used
+## 🚀 Live Demo
 
 ### Frontend
+https://task-management-frontend-4dex.onrender.com
+
+### Backend API
+https://task-management-backend-7854.onrender.com
+
+## ✨ Features
+
+- User registration
+- User login with JWT authentication
+- Create tasks
+- View tasks
+- Update task status
+- Mark tasks as completed
+- Mark completed tasks as pending
+- Delete tasks
+- MongoDB database integration
+- REST API
+- Responsive user interface
+- Full frontend and backend deployment
+
+## 🛠️ Technologies Used
+
+### Frontend
+
 - React
 - Vite
+- JavaScript
 - CSS
 
 ### Backend
+
 - Node.js
 - Express.js
 - MongoDB
-- REST API
+- JWT
+- bcrypt
+- CORS
+- dotenv
 
-## Project Structure
+### Database
+
+- MongoDB Atlas
+
+### Deployment
+
+- Render
+- GitHub
+
+## 📁 Project Structure
 
 ```text
-task-management-app/
+task-management/
+│
 ├── backend/
 │   ├── routes/
 │   │   ├── auth.js
 │   │   └── tasks.js
-│   ├── server.js
-│   └── package.json
+│   ├── .env
+│   ├── package.json
+│   ├── package-lock.json
+│   └── server.js
 │
 ├── frontend/
 │   ├── src/
+│   │   ├── assets/
 │   │   ├── App.jsx
 │   │   ├── App.css
+│   │   ├── index.css
 │   │   └── main.jsx
-│   └── package.json
+│   ├── public/
+│   ├── package.json
+│   ├── package-lock.json
+│   └── vite.config.js
 │
+├── .gitignore
 └── README.md
