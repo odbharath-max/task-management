@@ -25,6 +25,7 @@ function App() {
 
       // Backend may return an array directly
       setTasks(Array.isArray(data) ? data : data.tasks || []);
+      setMessage("");
     } catch (error) {
       console.error("Fetch tasks error:", error);
       setMessage("Could not load tasks");
