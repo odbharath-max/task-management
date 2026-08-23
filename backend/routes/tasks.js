@@ -1,21 +1,21 @@
 const express = require("express");
 const { ObjectId } = require("mongodb");
+const authenticateToken = require("../middleware/auth");
 
 const router = express.Router();
-
 
 // ======================================================
 // CREATE TASK
 // POST /api/tasks
 // ======================================================
 
-router.post("/", async (req, res) => {
+router.post("/", authenticateToken, async (req, res) => {
     try {
-        const { title, description, status, userId } = req.body;
+        const { title, description, status } = req.body;
 
-        if (!title || !userId) {
+        if (!title) {
             return res.status(400).json({
-                message: "Title and userId are required"
+                message: "Title is required"
             });
         }
 
@@ -26,7 +26,7 @@ router.post("/", async (req, res) => {
             title: title,
             description: description || "",
             status: status || "pending",
-            userId: userId,
+            userId: req.user.userId,
             createdAt: new Date()
         };
 
@@ -47,19 +47,20 @@ router.post("/", async (req, res) => {
     }
 });
 
-
 // ======================================================
-// GET ALL TASKS
+// GET ALL TASKS FOR LOGGED-IN USER
 // GET /api/tasks
 // ======================================================
 
-router.get("/", async (req, res) => {
+router.get("/", authenticateToken, async (req, res) => {
     try {
         const db = req.app.locals.db;
         const tasks = db.collection("tasks");
 
         const allTasks = await tasks
-            .find({})
+            .find({
+                userId: req.user.userId
+            })
             .sort({ createdAt: -1 })
             .toArray();
 
@@ -75,20 +76,25 @@ router.get("/", async (req, res) => {
     }
 });
 
-
 // ======================================================
 // GET TASKS FOR ONE USER
 // GET /api/tasks/user/:userId
 // ======================================================
 
-router.get("/user/:userId", async (req, res) => {
+router.get("/user/:userId", authenticateToken, async (req, res) => {
     try {
+        if (req.params.userId !== req.user.userId) {
+            return res.status(403).json({
+                message: "Access denied"
+            });
+        }
+
         const db = req.app.locals.db;
         const tasks = db.collection("tasks");
 
         const userTasks = await tasks
             .find({
-                userId: req.params.userId
+                userId: req.user.userId
             })
             .sort({ createdAt: -1 })
             .toArray();
@@ -105,21 +111,16 @@ router.get("/user/:userId", async (req, res) => {
     }
 });
 
-
 // ======================================================
 // UPDATE TASK
 // PUT /api/tasks/:id
 // ======================================================
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", authenticateToken, async (req, res) => {
     try {
         const { title, description, status } = req.body;
-
         const taskId = req.params.id;
 
-        console.log("Updating task:", taskId);
-
-        // Check if ID is a valid MongoDB ObjectId
         if (!ObjectId.isValid(taskId)) {
             return res.status(400).json({
                 message: "Invalid task ID"
@@ -131,7 +132,8 @@ router.put("/:id", async (req, res) => {
 
         const result = await tasks.updateOne(
             {
-                _id: new ObjectId(taskId)
+                _id: new ObjectId(taskId),
+                userId: req.user.userId
             },
             {
                 $set: {
@@ -143,13 +145,9 @@ router.put("/:id", async (req, res) => {
             }
         );
 
-        console.log("Matched:", result.matchedCount);
-        console.log("Modified:", result.modifiedCount);
-
         if (result.matchedCount === 0) {
             return res.status(404).json({
-                message: "Task not found",
-                taskId: taskId
+                message: "Task not found"
             });
         }
 
@@ -167,17 +165,14 @@ router.put("/:id", async (req, res) => {
     }
 });
 
-
 // ======================================================
 // DELETE TASK
 // DELETE /api/tasks/:id
 // ======================================================
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateToken, async (req, res) => {
     try {
         const taskId = req.params.id;
-
-        console.log("Deleting task:", taskId);
 
         if (!ObjectId.isValid(taskId)) {
             return res.status(400).json({
@@ -189,13 +184,13 @@ router.delete("/:id", async (req, res) => {
         const tasks = db.collection("tasks");
 
         const result = await tasks.deleteOne({
-            _id: new ObjectId(taskId)
+            _id: new ObjectId(taskId),
+            userId: req.user.userId
         });
 
         if (result.deletedCount === 0) {
             return res.status(404).json({
-                message: "Task not found",
-                taskId: taskId
+                message: "Task not found"
             });
         }
 
@@ -212,6 +207,5 @@ router.delete("/:id", async (req, res) => {
         });
     }
 });
-
 
 module.exports = router;
