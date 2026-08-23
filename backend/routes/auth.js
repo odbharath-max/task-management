@@ -6,7 +6,7 @@ const router = express.Router();
 
 console.log("AUTH ROUTES LOADED");
 
-const JWT_SECRET = "task_management_secret";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // =========================
 // REGISTER
